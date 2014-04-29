@@ -16,12 +16,11 @@
             
             try {
                 // Registering Postgresql JDBC driver with the DriverManager
-                Class.forName("org.postgresql.Driver");
+                Class.forName("org.postgresql.Driver").newInstance();
 
                 // Open a connection to the database using DriverManager
                 conn = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost:8080/cse135?" +
-                    "user=postgres&password=mecagoenlatapa", "postgres", "root");
+                    "jdbc:postgresql://localhost:8080/cse135", "postgres", "mecagoenlatapa");
             %>
             
             <%-- -------- INSERT Code -------- --%>

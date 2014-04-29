@@ -1,7 +1,7 @@
 <%@page import="java.util.*" %>
 <%@page import="java.sql.*" %>
 <%@page import="java.io.*" %>
-<%--@page import="org.postgresql.*" -%>
+<%@page import="org.postgresql.*" %>
 
 <html>
 	<%--Signup page--%>
@@ -49,32 +49,55 @@
 					</SELECT>
                   	</TD>
           		</tr>
+
+          		<TR>
+              		<TH></TH>
+                  	<TD width="50%"><INPUT TYPE="submit" NAME="submit"></TD>
+          		</TR>
+
+          		<TR>
+              		<TH></TH>
+                  	<TD width="50%"><INPUT TYPE="button" NAME="login" ONCLICK="window.location.href = 'login.jsp';">Login</TD>
+          		</TR>
+
    			</TABLE>
 			<%
 			String name = request.getParameter("name");
 			String role = request.getParameter("role");
 			String age = request.getParameter("age");
-			String state = request.getParameter("state"); 
+			String state = request.getParameter("state");
 
 			
-				String connectionURL = "jdbc:postgresql://localhost:8080/cse135?" +
-                    "user=postgres&password=mecagoenlatapa";
+				String connectionURL = "jdbc:postgresql://localhost:8080/cse135";
 				Connection connection = null;
 				PreparedStatement pstatement = null;
 				Class.forName("org.postgresql.Driver").newInstance();
 
+				int updateQuery = 0;
+
 				if(name!=null && age!=null){
 					try{
 				
-						connection = DriverManager.getConnection(connectionURL, "postgres", "root");
-						String queryString = "INSERT INTO stu_info (Name, Role, Age, State) VALUES (?,?,?,?)";
+						connection = DriverManager.getConnection(connectionURL, "postgres", "mecagoenlatapa");
+						connection.setAutoCommit(false);
+						String queryString = "INSERT INTO USERS (Name, Role, Age, State) VALUES (?,?,?,?)";
 						pstatement = connection.prepareStatement(queryString);
 						pstatement.setString(1, name);
 						pstatement.setString(2, role);
-						pstatement.setString(3, age);
+						pstatement.setInt(3, Integer.parseInt(age));
 						pstatement.setString(4, state);
 
-						int updateQuery = pstatement.executeUpdate();
+						updateQuery = pstatement.executeUpdate();
+						connection.commit();
+						connection.setAutoCommit(true);
+						if(updateQuery != 0){ %>
+							<TABLE>
+								<TR>
+	              					<TH width="50%">data inserted</TH>
+	                  			</TR>
+							</TABLE>
+
+						<%}
 					}
 					catch(Exception e){
 						out.println("Unable to connect to db");
