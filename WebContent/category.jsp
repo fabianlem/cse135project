@@ -16,11 +16,11 @@
             
             try {
                 // Registering Postgresql JDBC driver with the DriverManager
-                Class.forName("org.postgresql.Driver").newInstance();
+                Class.forName("org.postgresql.Driver");
 
                 // Open a connection to the database using DriverManager
                 conn = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost:8080/cse135", "postgres", "mecagoenlatapa");
+                    "jdbc:postgresql://localhost/cse135", "postgres", "postgres");
             %>
             
             <%-- -------- INSERT Code -------- --%>

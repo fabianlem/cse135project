@@ -27,14 +27,21 @@
    			
    			<%
    			String name = request.getParameter("name");
-   			String connectionURL = "jdbc:postgresql://localhost:8080/cse135";
+   			String connectionURL = "jdbc:postgresql://localhost/cse135";
 			Connection connection = null;
 			PreparedStatement pstatement = null;
-			Class.forName("org.postgresql.Driver").newInstance();
-			connection = DriverManager.getConnection(connectionURL, "postgres", "mecagoenlatapa");
-			//connection.setAutoCommit(false);
-			// search in database code HERE
+			Class.forName("org.postgresql.Driver");
+			if(name!= null){
+				try{
+					connection = DriverManager.getConnection(connectionURL, "postgres", "postgres");
+					//connection.setAutoCommit(false);
+					// search in database code HERE
+				}catch(Exception e){
+					out.println(e.getMessage());
+				}
+			}
    			%>
+		
 
 		</FORM>
 	</body>

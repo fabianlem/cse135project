@@ -22,7 +22,7 @@
       
 		      	<TR>
 		            <TH width="50%">Age</TH>
-		            <TD width="50%"><INPUT TYPE="text" NAME="Age"></TD>
+		            <TD width="50%"><INPUT TYPE="text" NAME="age"></TD>
 		        </TR>
           
 	          	<TR>
@@ -55,10 +55,7 @@
                   	<TD width="50%"><INPUT TYPE="submit" NAME="submit"></TD>
           		</TR>
 
-          		<TR>
-              		<TH></TH>
-                  	<TD width="50%"><INPUT TYPE="button" NAME="login" ONCLICK="window.location.href = 'login.jsp';">Login</TD>
-          		</TR>
+          		
 
    			</TABLE>
 			<%
@@ -68,26 +65,32 @@
 			String state = request.getParameter("state");
 
 			
-				String connectionURL = "jdbc:postgresql://localhost:8080/cse135";
+				String connectionURL = "jdbc:postgresql://localhost/cse135";
 				Connection connection = null;
 				PreparedStatement pstatement = null;
-				Class.forName("org.postgresql.Driver").newInstance();
+				
 
 				int updateQuery = 0;
-
+				out.println(name);
+				out.println(age);
 				if(name!=null && age!=null){
 					try{
+
+						Class.forName("org.postgresql.Driver");
+					out.println("here");
 				
-						connection = DriverManager.getConnection(connectionURL, "postgres", "mecagoenlatapa");
-						connection.setAutoCommit(false);
+						connection = DriverManager.getConnection("jdbc:postgresql://localhost/" + "cse135?user=postgres&password=postgres");
+						out.println("got connection");
+					//	connection.setAutoCommit(false);
 						String queryString = "INSERT INTO USERS (Name, Role, Age, State) VALUES (?,?,?,?)";
 						pstatement = connection.prepareStatement(queryString);
 						pstatement.setString(1, name);
 						pstatement.setString(2, role);
 						pstatement.setInt(3, Integer.parseInt(age));
 						pstatement.setString(4, state);
-
+out.println("statements prepared");
 						updateQuery = pstatement.executeUpdate();
+out.println("execute updated");
 						connection.commit();
 						connection.setAutoCommit(true);
 						if(updateQuery != 0){ %>
@@ -100,19 +103,37 @@
 						<%}
 					}
 					catch(Exception e){
-						out.println("Unable to connect to db");
+						out.println(e.getMessage());
 					}
 							
-					finally{
-						pstatement.close();
-						connection.close();
+					finally{ 
+
+						if (pstatement != null) {
+		                    try {
+			                        pstatement.close();
+			                    } catch (SQLException e) { } // Ignore
+			                    pstatement = null;
+			                }
+		                
+		                if (connection != null) {
+		                    try {
+		                        connection.close();
+		                    } catch (SQLException e) { } // Ignore
+		                    connection = null;
+		                }
 					}
-				}
+					}
 		
 			%>
 			<%-- Drop down menu --%>
 			
 		</FORM>
+		<TR>
+              		<TH></TH>
+              		<FORM action="login.jsp" method ="post">
+                  		<TD width="50%"><INPUT TYPE="submit" value="login"></TD>
+                  	</FORM>
+          		</TR>
 	</body>
 
 
