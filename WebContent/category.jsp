@@ -1,7 +1,18 @@
 <html>
 
 <body>
+<% if(session.getAttribute("username") == null) {
+%>
+<h2>You are not logged in!!!</h2>
+<%
+	out.print("<a href='login.jsp'>Log in</a>"); 
+	}
+   else {
+	String user = session.getAttribute("username").toString(); 
+	%>
+<h1>Welcome, <%=user%> </h1>
 <h2>Categories</h2>
+<%} %>
 <table>
     <tr>
         <td>
@@ -12,6 +23,7 @@
             
             Connection conn = null;
             PreparedStatement pstmt = null;
+	    Statement stmt = null;
             ResultSet rs = null;
             
             try {
@@ -21,98 +33,100 @@
                 // Open a connection to the database using DriverManager
                 conn = DriverManager.getConnection(
                     "jdbc:postgresql://localhost/cse135", "postgres", "postgres");
+	    %>
+            <%-- -------- SELECT Statement Code -------- --%>
+            <%
+	        // Create the statement
+        	Statement statement = conn.createStatement();
+	
+      	        // Use the created statement to SELECT
+               	// the student attributes FROM the Student table.
+               	rs = statement.executeQuery("SELECT * FROM Categories");
+
+		if(session.getAttribute("username") != null && 
+			session.getAttribute("role").equals("Owner"))
+		{
             %>
             
             <%-- -------- INSERT Code -------- --%>
             <%
-String name = "Fabian";
-session.setAttribute("username", name);
-                String action = request.getParameter("action");
-                // Check if an insertion is requested
-                if (action != null && action.equals("insert")) {
 
-                    // Begin transaction
-                    conn.setAutoCommit(false);
+	                String action = request.getParameter("action");
+        	        // Check if an insertion is requested
+                	if (action != null && action.equals("insert")) {
 
-                    // Create the prepared statement and use it to
-                    // INSERT student values INTO the Categories table.
-                    pstmt = conn
-                    .prepareStatement("INSERT INTO Categories (name, description, owner) VALUES (?, ?, ?)");
+	                    // Begin transaction
+        	            conn.setAutoCommit(false);
 
-                    pstmt.setString(1, request.getParameter("name"));
-                    pstmt.setString(2, request.getParameter("description"));
-                    pstmt.setString(3, (String)session.getAttribute("username"));
-                    int rowCount = pstmt.executeUpdate();
+	                    // Create the prepared statement and use it to
+        	            // INSERT student values INTO the Categories table.
+                	    pstmt = conn
+	                    .prepareStatement("INSERT INTO Categories (name, description, owner) VALUES (?, ?, ?)");
 
-                    // Commit transaction
-                    conn.commit();
-                    conn.setAutoCommit(true);
-                }
+	                    pstmt.setString(1, request.getParameter("name"));
+        	            pstmt.setString(2, request.getParameter("description"));
+                	    pstmt.setString(3, (String)session.getAttribute("username"));
+	                    int rowCount = pstmt.executeUpdate();
+
+	                    // Commit transaction
+        	            conn.commit();
+                	    conn.setAutoCommit(true);
+                	}
             %>
             
             <%-- -------- UPDATE Code -------- --%>
             <%
-                // Check if an update is requested
-                if (action != null && action.equals("update")) {
+	                // Check if an update is requested
+        	        if (action != null && action.equals("update")) {
 
-                    // Begin transaction
-                    conn.setAutoCommit(false);
+	                    // Begin transaction
+        	            conn.setAutoCommit(false);
 
-                    // Create the prepared statement and use it to
-                    // UPDATE student values in the Students table.
-                    pstmt = conn
-                        .prepareStatement("UPDATE students SET name = ?, description = ?, "
-                            + "owner = ?");
+	                    // Create the prepared statement and use it to
+        	            // UPDATE student values in the Students table.
+                	    pstmt = conn
+                        	.prepareStatement("UPDATE students SET name = ?, description = ?, "
+	                            + "owner = ?");
 
-                    pstmt.setString(1, request.getParameter("name"));
-                    pstmt.setString(2, request.getParameter("description"));
-                    pstmt.setString(3, (String)session.getAttribute("username"));
-                    int rowCount = pstmt.executeUpdate();
+	                    pstmt.setString(1, request.getParameter("name"));
+        	            pstmt.setString(2, request.getParameter("description"));
+                	    pstmt.setString(3, (String)session.getAttribute("username"));
+	                    int rowCount = pstmt.executeUpdate();
 
-                    // Commit transaction
-                    conn.commit();
-                    conn.setAutoCommit(true);
-                }
+	                    // Commit transaction
+        	            conn.commit();
+                	    conn.setAutoCommit(true);
+                	}
             %>
             
             <%-- -------- DELETE Code -------- --%>
             <%
-                // Check if a delete is requested
-                if (action != null && action.equals("delete")) {
+	                // Check if a delete is requested
+        	        if (action != null && action.equals("delete")) {
 
-                    // Begin transaction
-                    conn.setAutoCommit(false);
+	                    // Begin transaction
+        	            conn.setAutoCommit(false);
 
-                    // Create the prepared statement and use it to
-                    // DELETE students FROM the Students table.
-                    pstmt = conn
-                        .prepareStatement("DELETE FROM Categories WHERE name = ?");
+	                    // Create the prepared statement and use it to
+        	            // DELETE students FROM the Students table.
+                	    pstmt = conn
+                        	.prepareStatement("DELETE FROM Categories WHERE name = ?");
 
-                    pstmt.setString(1, request.getParameter("name"));
-                    int rowCount = pstmt.executeUpdate();
+	                    pstmt.setString(1, request.getParameter("name"));
+        	            int rowCount = pstmt.executeUpdate();
 
-                    // Commit transaction
-                    conn.commit();
-                    conn.setAutoCommit(true);
-                }
-            %>
-
-            <%-- -------- SELECT Statement Code -------- --%>
-            <%
-                // Create the statement
-                Statement statement = conn.createStatement();
-
-                // Use the created statement to SELECT
-                // the student attributes FROM the Student table.
-                rs = statement.executeQuery("SELECT * FROM Categories");
+	                    // Commit transaction
+        	            conn.commit();
+                	    conn.setAutoCommit(true);
+                	}
             %>
             
             <!-- Add an HTML table header row to format the results -->
             <table border="1">
             <tr>
+                <th>Owner</th>
                 <th>Name</th>
                 <th>Description</th>
-                <th>Owner</th>
             </tr>
 
             <tr>
@@ -127,8 +141,8 @@ session.setAttribute("username", name);
 
             <%-- -------- Iteration Code -------- --%>
             <%
-                // Iterate over the ResultSet
-                while (rs.next()) {
+	                // Iterate over the ResultSet
+        	        while (rs.next()) {
             %>
 
             <tr>
@@ -163,19 +177,21 @@ session.setAttribute("username", name);
             </tr>
 
             <%
+			}
                 }
             %>
 
             <%-- -------- Close Connection Code -------- --%>
             <%
-                // Close the ResultSet
+       	        // Close the ResultSet
                 rs.close();
 
-                // Close the Statement
-                statement.close();
-
-                // Close the Connection
+               	// Close the Statement
+       	        statement.close();
+	
+	        // Close the Connection
                 conn.close();
+
             } catch (SQLException e) {
 
                 // Wrap the SQL exception in a runtime exception to propagate

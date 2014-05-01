@@ -71,16 +71,16 @@
 				
 
 				int updateQuery = 0;
-				out.println(name);
-				out.println(age);
+				//out.println(name);
+				//out.println(age);
 				if(name!=null && age!=null){
 					try{
 
 						Class.forName("org.postgresql.Driver");
-					out.println("here");
+					//out.println("here");
 				
-						connection = DriverManager.getConnection("jdbc:postgresql://localhost/" + "cse135?user=postgres&password=postgres");
-						out.println("got connection");
+						connection = DriverManager.getConnection("jdbc:postgresql://localhost/cse135?", "postgres", "postgres");
+						//out.println("got connection");
 					//	connection.setAutoCommit(false);
 						String queryString = "INSERT INTO USERS (Name, Role, Age, State) VALUES (?,?,?,?)";
 						pstatement = connection.prepareStatement(queryString);
@@ -88,22 +88,27 @@
 						pstatement.setString(2, role);
 						pstatement.setInt(3, Integer.parseInt(age));
 						pstatement.setString(4, state);
-out.println("statements prepared");
+
 						updateQuery = pstatement.executeUpdate();
-out.println("execute updated");
+
 						connection.commit();
 						connection.setAutoCommit(true);
-						if(updateQuery != 0){ %>
-							<TABLE>
-								<TR>
-	              					<TH width="50%">data inserted</TH>
-	                  			</TR>
-							</TABLE>
+						if(updateQuery != 0){ 
+							session.setAttribute("username", name);
+							session.setAttribute("role", role);
 
-						<%}
+							//Owner or Customer
+      							response.sendRedirect("signup2.jsp");	
+ 
+						}else{
+						
+						}
 					}
 					catch(Exception e){
-						out.println(e.getMessage());
+						//out.println(e.getMessage());
+						%>
+						<h2 style="color:red;">Pick a different Username</h2> 
+						<%
 					}
 							
 					finally{ 
@@ -128,7 +133,7 @@ out.println("execute updated");
 			<%-- Drop down menu --%>
 			
 		</FORM>
-		<TR>
+			<TR>
               		<TH></TH>
               		<FORM action="login.jsp" method ="post">
                   		<TD width="50%"><INPUT TYPE="submit" value="login"></TD>
