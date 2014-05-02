@@ -12,7 +12,7 @@
 	
 	<body>
 
-		<FORM action="signup.jsp" method ="get"> 
+		<FORM action="signup.jsp" method ="post"> 
 
 			<TABLE style="background-color: #ECE5B6;" WIDTH="30%" >
          		<TR>
@@ -81,7 +81,8 @@
 				
 						connection = DriverManager.getConnection("jdbc:postgresql://localhost/cse135?", "postgres", "postgres");
 						//out.println("got connection");
-					//	connection.setAutoCommit(false);
+					// Begin Transaction
+						connection.setAutoCommit(false);
 						String queryString = "INSERT INTO USERS (Name, Role, Age, State) VALUES (?,?,?,?)";
 						pstatement = connection.prepareStatement(queryString);
 						pstatement.setString(1, name);

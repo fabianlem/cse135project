@@ -90,13 +90,16 @@
             </tr>
 				
 		
-  			
-
-   			</TABLE>
-			</tr>
-            <%
+  			  <%
             }
             %>
+            <TABLE WIDTH="70%" >
+         		<TR>
+					<TH>Thank you for your payment of $ <%=total%> </TH>
+</TR>
+   			</TABLE>
+			
+          
 
             <%-- -------- Close Connection Code -------- --%>
             <%

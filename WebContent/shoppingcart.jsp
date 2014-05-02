@@ -78,7 +78,7 @@
                 	</td> 
                 </form>
             </tr>
-
+<%} %>
 			
 			<tr>
 			<FORM action="confirmation.jsp" method ="post"> 
@@ -134,7 +134,7 @@
    			</TABLE>
 			</tr>
             <%
-                }
+                
             %>
 
             <%-- -------- Close Connection Code -------- --%>
