@@ -5,25 +5,32 @@
 %>
 <h2>You are not logged in!!!</h2>
 <%
-	response.setHeader("Refresh", "3; URL=login.jsp;"); 
+	out.print("<a href='login.jsp'>Log in</a>"); 
 	}
    else {
 	String user = session.getAttribute("username").toString(); 
-	%>
+
+%>
+
+
+
 <h1>Welcome, <%=user%> </h1>
-<h2>Confirmation</h2>
-<h3>Thank you for your purchase! Here are the items you have purchased:</h3>
 <%} %>
 
-
+ <% int productSKU = Integer.parseInt(session.getAttribute("psku").toString()); %> 
 <table>
     <tr>
         <td>
-            <%-- Import the java.sql package --%>
+<h2>Product Order</h2>
+            <%-- Import the java.sql package --%>`
             <%@ page import="java.sql.*"%>
+            <%@ page import="java.math.*"%>
             <%-- -------- Open Connection Code -------- --%>
             <%
-            
+
+
+
+ 			out.println("The items have been successfully added to your cart!"); 
             Connection conn = null;
             PreparedStatement pstmt = null;
             ResultSet rs = null;
@@ -38,23 +45,23 @@
             %>
             
 
-
-           <%-- -------- SELECT Statement Code -------- --%>
+            <%-- -------- SELECT Statement Code for SHOPPING CART-------- --%>
             <%
-			
+		
+		
 		if(session.getAttribute("username") != null && 
 			session.getAttribute("role").equals("Customer"))
-		{
+		{            
+            
                 // Create the statement
                 Statement statement = conn.createStatement();
-
-                // Use the created statement to SELECT
-                // the student attributes FROM the Cart table.
-                //rs = statement.executeQuery("SELECT Cart.product, Products.price, Cart.quantity FROM Cart, Products WHERE Cart.product = Products.name");
-                rs = statement.executeQuery("SELECT Products.name, Cart.quantity, Products.price FROM Cart, Products WHERE Cart.product = Products.sku AND Cart.customer = \'" + session.getAttribute("username").toString() + "\'");
+				// Use the created statement to SELECT
+                // the attributes FROM the Cart table.
+                rs = statement.executeQuery("SELECT Products.name, Cart.quantity, Products.price FROM Cart, Products WHERE Cart.product = Products.sku AND Cart.customer = \'" +  session.getAttribute("username").toString() + "\'");
             %>
             
             <!-- Add an HTML table header row to format the results -->
+
             <table border="1">
             <tr>
                 <th>Name</th>
@@ -62,17 +69,9 @@
                 <th>Price</th>
             </tr>
 
- <!--           <tr>
-                <form action="category.jsp" method="POST">
-                    <input type="hidden" name="action" value="insert"/>
-                    <th>&nbsp;</th>
-                    <th><input value="" name="name" size="15"/></th>
-                    <th><input value="" name="description" size="25"/></th>
-                    <th><input type="submit" value="Insert"/></th>
-                </form>
-            </tr>
--->
-            <%-- -------- Iteration Code -------- --%>
+
+<h4>Currently in your cart:</h4>
+            <%-- -------- Iteration Code for SHOPPING CART-------- --%>
             <%
                 // Iterate over the ResultSet
 				Double total = 0.0;
@@ -80,53 +79,43 @@
             %>
 
             <tr>
-
-                <form action="confirmation.jsp" method="POST"> 
-                	<td>
-                	<!--input type="hidden" name="action" value="update"/--> 
-                	<%=rs.getString("name")%> <%-- get customer --%>
-                	</td> 
+                <form action="productorder2.jsp" method="POST">
+                    <td>
+                	<!-- input type="hidden" name="action" value="update"/--> 
+                	<%=rs.getString("name")%> <%-- get customer --%> 
+                	</td>
                 	<%int quant = rs.getInt("quantity");%> 
-                	
                 	<td> <%-- get quantity --%> 
                 	<%=quant%> 
                 	</td> 
-                	<%Double cost = (rs.getDouble("price")*quant); //<%--get prices --
-                	 
+                	<%Double cost = (rs.getDouble("price")*quant); //-- get prices --
                 	total += cost; %> 
                 	<td> <%=cost%> 
                 	</td> 
                 </form>
             </tr>
-
-
-  			  <%
-            }
+            <%
+                }
             %>
-            <TABLE WIDTH="70%" >
+<br>
+			<tr>
+			<FORM action="productorder2.jsp" method ="post"> 
+
+			<TABLE WIDTH="75%" >
          		<TR>
-					<TH>Thank you for your payment of $ <%=total%> </TH>
-					<TH>Your cart is now empty!</TH>
-</TR>
+         		<TH>
+					<br>Your total so far is updated to: $<%=total%> 
+          		</TH>
+          		</TR>
+      		</FORM>
    			</TABLE>
-			
-			
-			
-			
+			</tr>
 			
 			<%
-			rs = statement.executeQuery("DELETE FROM Cart WHERE Cart.customer = \'" + session.getAttribute("username").toString() + "\'");
-			conn.commit();
-			conn.setAutoCommit(true);
+					response.setHeader("Refresh", "3; URL=productbrowsing.jsp;");
+
 			
-			
-			%>
-			
-			
-			
-			
-<%
-}
+		}
 		else
 		{
 	    %>
@@ -134,27 +123,23 @@
 	    <%
 			response.setHeader("Refresh", "3; URL=category.jsp;");
 		} 
-
-
-%>
-          
-
+		%>
             <%-- -------- Close Connection Code -------- --%>
             <%
                 // Close the ResultSet
-//                rs.close();
+                //rs.close();
 
                 // Close the Statement
-  //              statement.close();
+                //statement.close();
 
                 // Close the Connection
-                conn.close();
+                //conn.close();
             } catch (SQLException e) {
 
                 // Wrap the SQL exception in a runtime exception to propagate
                 // it upwards
                 //throw new RuntimeException(e);
-                out.print(e.getMessage());
+                out.println(e.getMessage());
             }
             finally {
                 // Release resources in a finally block in reverse-order of
@@ -166,6 +151,18 @@
                     } catch (SQLException e) { } // Ignore
                     rs = null;
                 }
+				/*if (rs1 != null) {
+                    try {
+                        rs1.close();
+                    } catch (SQLException e) { } // Ignore
+                    rs1 = null;
+                }
+                if (rs2 != null) {
+                    try {
+                        rs2.close();
+                    } catch (SQLException e) { } // Ignore
+                    rs2 = null;
+                }*/
                 if (pstmt != null) {
                     try {
                         pstmt.close();
@@ -184,13 +181,6 @@
         </td>
     </tr>
 </table>
-
-
-    <FORM action="productbrowsing.jsp" method ="post">
-    	<TD width="50%"><INPUT TYPE="submit" value="More shopping!"></TD>
-    </FORM>
-
-
 </body>
 
 </html>

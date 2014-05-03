@@ -13,6 +13,9 @@
 <h1>Welcome, <%=user%> </h1>
 <h2>Categories</h2>
 <%} %>
+<form action="products.jsp" method="POST">
+    <input type="submit" name="products" value="Products"/>
+</form>
 <table>
     <tr>
         <td>
@@ -342,7 +345,7 @@
 	    %>
 			<h2>You are not an Owner!!!</h2>
 	    <%
-			response.setHeader("Refresh", "3; URL=products.jsp;");
+			response.setHeader("Refresh", "3; URL=productbrowsing.jsp;");
 		} 
             %>
 
