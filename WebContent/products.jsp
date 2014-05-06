@@ -320,7 +320,7 @@
             <!-- Add an HTML table header row to format the results -->
             <table border="1">
             <tr>
-                <th>Owner</th>
+                <!-- th>Owner</th-->
                 <th>Name</th>
                 <th>SKU</th>
                 <th>Category</th>
@@ -331,7 +331,7 @@
             <tr>
                 <form action="products.jsp" method="POST">
                     <input type="hidden" name="action" value="insert"/>
-                    <th>&nbsp;</th>
+                    <!--  >th>&nbsp;</th-->
                     <th><input value="" name="name" size="15"/></th>
                     <th><input value="" name="sku" size="25"/></th>
                     <th>    
@@ -385,9 +385,9 @@
 
 
                 <%-- Get the owner --%>
-                <td>
+                <!--td-->
                     <%--=rs.getString("")--%>
-                </td>
+                <!--  /td-->
 
                 <%-- Get the name --%>
                 <td>
