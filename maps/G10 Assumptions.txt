@@ -1,0 +1,47 @@
+Wendy Kwan
+Fabian Lema 
+Brian Ly
+CSE135 Assignment #1
+Group 10
+
+
+CSE135 Group 10 Assumptions
+
+"Signup" Page	
+1)	We assumed that the "signup" page for new users is equivalent to the "login" for returning users. That is, once a new user has signed up, he/she is no longer required to log in again. The new user will automatically be redirect to the categories page if he/she declared to be an owner, or to a products page if he/she said customer. 
+2)	We assumed that the “signup confirmation” page after a successful signup is allowed to redirect the user to his corresponding page according to his/her role. In other words, after a successful signup, a customer will be redirected to his/her categories page, while an owner will be redirected to the product page. 
+3)	We assumed that age is a positive integer.
+
+
+"Login" Page
+1)	(Like mentioned above), we assumed that an user does not need to “login” if he/she is new and has gained access to the application through the “signup” page. 
+
+
+"Categories" Page
+1)	We assumed that as long as the user is an owner, he/she are able to update, insert, and delete all categories (as long as there are no products within that category).
+2)	We assumed that the “text box” for product name is equivalent to “small text area” for the product description.
+3)	We assumed that if a customer tries to access the categories page manually by URL, he/she will just automatically be redirected to the products page, instead.
+4)	We assumed that only owners can access the "categories" page - customers will be redirected to the product browsing page.
+
+
+"Products" Page
+1)	We assumed that the price would be BigDecimal. 
+2)	We assumed that the SKU would be a positive integer.
+3)	We assumed that only owners can access the "products" page - customers will be redirected to the product browsing page.
+4)      We assumed that if a customer has added a product in his/her cart, and an owner tries to remove it from the product page, the owner would not be able to via a message displayed on the page.
+
+
+"Products Browsing" Page
+1)	We assumed that only customers can access the "product browsing" page - owners will be redirected to the categories page.
+
+
+"Product Order" Page
+1)	We assumed that the user is already logged in – if not, the page will tell them to first login before continuing. 
+2)	We assumed that the user does not have 2 concurrent browser sessions happening at once.
+3)	We assumed that the quantity of items wished to be added to cart is a positive integer. 
+4) 	We assumed that only customers can access the "product browsing" page - owner will be redirected to the categories page.
+
+
+"Buy Shopping Cart" Page / “Confirmation” Page
+1)	We assumed that we do not need to show the “emptied” cart
+2) 	We assumed that only customers can access the "product browsing" page - owner will be redirected to the categories page.

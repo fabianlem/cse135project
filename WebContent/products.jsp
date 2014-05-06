@@ -287,17 +287,33 @@
 	                    // Begin transaction
         	            conn.setAutoCommit(false);
 
-	                    // Create the prepared statement and use it to
-        	            // DELETE students FROM the Students table.
-                	    pstmt = conn
-                        	.prepareStatement("DELETE FROM products WHERE sku = ?");
+                        rs = statement.executeQuery("select * from cart inner join products on cart.product=products.sku where products.sku=" + Integer.parseInt(request.getParameter("sku")));
+                        boolean delFlag = false;
+                        while(rs.next()){
+                            delFlag = true;
+                        }
 
-	                    pstmt.setInt(1, Integer.parseInt(request.getParameter("sku")));
-        	            int rowCount = pstmt.executeUpdate();
+                        if(!delFlag){
+       	                    // Create the prepared statement and use it to
+            	            // DELETE students FROM the Students table.
+                    	    pstmt = conn
+                            	.prepareStatement("DELETE FROM products WHERE sku = ?");
 
-	                    // Commit transaction
-        	            conn.commit();
-                	    conn.setAutoCommit(true);
+    	                    pstmt.setInt(1, Integer.parseInt(request.getParameter("sku")));
+            	            int rowCount = pstmt.executeUpdate();
+
+    	                    // Commit transaction
+            	            conn.commit();
+                    	    conn.setAutoCommit(true);
+                        }else{
+                    %>
+                            <h3>
+                                <font color="#ff0000">
+                                <%="Deletion failed. Product in customers cart."%>
+                            </h3>
+                    <%
+                            }
+
                 	}
             %>
             

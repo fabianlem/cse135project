@@ -49,32 +49,42 @@
 				        role = rs.getString("role");
 
 				         //Display values
-				         out.print("Role: " + role);
+				         //out.print("Role: " + role);
 				         }
       				rs.close();
       				if(role!=null){
       					session.setAttribute("username", name);
       					session.setAttribute("role", role);
-      					out.println("Welcome " + name);
-      					if(role.equals("Owner")){
-      						response.sendRedirect("category.jsp");
       					%>
-      					<a class="btn btn-default" href ="category.jsp" >View Categories</a>
-      					<% 
+      						<h3 font color="#ff0000">Welcome <%=name %></h3>
+      					<%
+      					//out.println("Welcome " + name);
+      					if(role.equals("Owner")){
+      					%>
+      						<h3 font color="#ff0000">Redirecting to Categories</h3>
+      					<%
+      						response.setHeader("Refresh", "2; URL=category.jsp;");
+      					
+      						
       					}
       					else if(role.equals("Customer")){
-      						%>
-      						<a class="btn btn-default" href ="category.jsp" >View Products</a>
-      						<%
+      					%>
+      						<h3 font color="#ff0000">Redirecting to Product Browsing</h3>
+      					<%
+      						response.setHeader("Refresh", "2; URL=productbrowsing.jsp;");
       					}
       				}else{
-      					out.println("The provided name " + name + " is not known.");
+      					%>
+      					
+  						<h3 font color="#ff0000">The provided name "<%=name %>" is not known</h3>
+  					<%
+      					
       				}
       			}catch (SQLException e){
-      				out.println(e.getMessage());
+      				//out.println(e.getMessage());
       			}
 				catch(Exception e){
-					out.println(e.getMessage());
+					//out.println(e.getMessage());
 				}
 			}
    			%>
