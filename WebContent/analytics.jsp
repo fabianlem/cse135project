@@ -149,7 +149,7 @@
 							out.println(stateStr);	
 							// CATEGORY FILTER 
 							if(category != null && !category.equals("ALL"))  
-								categoryStr = " AND products.cid = \'" + category + "\'"; 
+								categoryStr = " AND products.cid = categories.id AND categories.name = \'" + category + "\'"; 
 							// AGE FILTER 
 							if(age != null && !age.equals("ALL")) 
 								ageStr = " AND users.age " + age;
@@ -168,7 +168,7 @@
 							
 							// PRODUCT NAMES (TOP ROW)
 							out.println("before query "+stateStr );
-							rs = statement.executeQuery("SELECT products.name, products.id, sum(sales.quantity*sales.price) as amount FROM Products, Sales where sales.pid = products.id group by products.id order by products.name asc limit 10 offset " + colOff);
+							rs = statement.executeQuery("SELECT products.name, products.id, sum(sales.quantity*sales.price) as amount FROM Products, Sales, categories where sales.pid = products.id" + categoryStr + " group by products.id order by products.name asc limit 10 offset " + colOff);
 								while(rs.next()){ 	
 								
 									String pName = rs.getString("name");
@@ -192,8 +192,8 @@
 						// *** CUSTOMER *** NAMES (LEFT COLUMN)
 						if(session.getAttribute("main") != null && session.getAttribute("main").equals("State")) {
 							/*rs = statement.executeQuery("SELECT users.name, users.id, sum(sales.quantity * sales.price) as amount FROM users, sales where sales.uid = users.id group by users.id order by users.name asc limit 20 offset " + rowOff);*/
-							out.println("before query "+stateStr );
-							rs = statement.executeQuery("SELECT users.state, SUM(sales.quantity * sales.price) AS amount FROM users, sales, products WHERE sales.uid = users.id AND sales.pid = products.id " + stateStr + ageStr + " GROUP BY users.state ORDER BY users.state ASC LIMIT 20 OFFSET " + rowOff);
+							out.println("before query "+ categoryStr );
+							rs = statement.executeQuery("SELECT users.state, SUM(sales.quantity * sales.price) AS amount FROM users, sales, products, categories WHERE sales.uid = users.id" + categoryStr + " AND sales.pid = products.id " + stateStr + ageStr + " GROUP BY users.state ORDER BY users.state ASC LIMIT 20 OFFSET " + rowOff);
                             	while(rs.next()){ 	
 								%>
 									<tr>
@@ -201,7 +201,7 @@
 										<%
 										 /*rs1 = statement.executeQuery("select products.id, sum(sales.quantity) as res from products, sales where sales.uid= "+ rs.getInt("users.id") +" and products.id = sales.pid group by products.id");*/
 										 /*rs1 = statement2.executeQuery("select sum(sales.quantity) as res from products cross join sales where sales.uid ="+ rs.getInt("id")+" and sales.pid = products.id group by sales.pid, products.id order by products.name asc");*/
-										 rs1 = statement2.executeQuery("select result.res from ( (select products.id as id, products.name as name, sum(sales.quantity * products.price) as res from products cross join sales, users where sales.uid = users.id and users.state = \'"+ rs.getString("state")+"\' and sales.pid = products.id" + ageStr + " group by sales.pid, products.id order by products.name asc) UNION (select products.id as id, products.name as name, 0 as res from products where products.id not in (select products.id from products, sales, users where sales.uid = users.id and users.state =\'"+ rs.getString("state")+"\' and products.id = sales.pid" + ageStr + " )) ) as result order by result.name asc limit 10 offset " + colOff);
+										 rs1 = statement2.executeQuery("select result.res from ( (select products.id as id, products.name as name, sum(sales.quantity * products.price) as res from products cross join sales, users, categories where sales.uid = users.id and users.state = \'"+ rs.getString("state")+"\' and sales.pid = products.id" + ageStr + categoryStr + " group by sales.pid, products.id order by products.name asc) UNION (select products.id as id, products.name as name, 0 as res from products where products.id not in (select products.id from products, sales, users where sales.uid = users.id and users.state =\'"+ rs.getString("state")+"\' and products.id = sales.pid" + ageStr + " )) ) as result order by result.name asc limit 10 offset " + colOff);
 										while(rs1.next()){
 										%>
 											<td><%=rs1.getString("res")%></td>
@@ -211,7 +211,9 @@
 						}
 						else{ //(main != null && main.equals("State")) {		// *** STATE *** NAMES (LEFT COLUMN)
 							/*rs = statement.executeQuery("SELECT users.state, SUM(sales.quantity * sales.price) AS amount FROM users, sales, products WHERE sales.uid = users.id AND sales.pid = products.id GROUP BY users.state ORDER BY users.state ASC LIMIT 20 OFFSET " + rowOff);*/
-							rs = statement.executeQuery("SELECT users.name, users.id, sum(sales.quantity * sales.price) as amount FROM users, sales where sales.uid = users.id " + stateStr + ageStr + " group by users.id order by users.name asc limit 20 offset " + rowOff);
+							out.println("before query "+ categoryStr );
+							rs = statement.executeQuery("SELECT u.name, u.id, sum(sales.quantity * sales.price) as amount FROM (select * from users where 1=1" + stateStr + ageStr + " group by users.id order by users.name limit 20 offset " + rowOff + ") as u inner join sales on (u.id = sales.uid) inner join products on (sales.pid = products.id), categories where 1=1" + categoryStr + " group by u.id, u.name order by u.name limit 20");
+							/*rs = statement.executeQuery("SELECT users.name, users.id, sum(sales.quantity * sales.price) as amount FROM users, sales, categories, products where sales.uid = users.id " + stateStr + categoryStr + ageStr + " group by users.id order by users.name asc limit 20 offset " + rowOff);*/
 
                         	while(rs.next()){ 	
 							%>
