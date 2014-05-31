@@ -1,5 +1,6 @@
 <%@ page import="java.sql.*"%>
 <%@ page import="java.util.*"%>
+<%@ page import="java.lang.*"%>
 <html>
 
 	<body>
@@ -22,6 +23,11 @@
                 PreparedStatement pstmt = null;
                 ResultSet rs= null;
                 ResultSet rs1 = null;
+                ResultSet test1 = null;
+                ResultSet test2 = null;
+                long endProd, endCust, end;
+                long start = System.currentTimeMillis();
+                long endTable = 0;
                 try{
                     // Registering Postgresql JDBC driver with the DriverManager
                     Class.forName("org.postgresql.Driver");
@@ -37,6 +43,7 @@
 				<td> <!-- left row (with options) --> 
 					<form method= "POST">
 					<input type="hidden" name="action" value="filter">
+					<% if(session.getAttribute("flag") == null || session.getAttribute("flag").equals("true")) { %>
 					<%-- Cutomers Dropdown --%>
 					<tr>
 			            <SELECT NAME = "main"> 
@@ -90,8 +97,14 @@
 			        <%-- Run Query --%>
 		            <tr>
 		            		<input type="submit" value="Run Query">
-                		
+                			
 			        </tr>
+			        <% } 
+			        else { %>
+			        <tr>
+			        	<input type="submit" value = "New Query">
+			        </tr>
+			        <% } %>
 			        </form>
 				</td> 
 
@@ -120,23 +133,32 @@
 							if(action != null && action.equals("row"))
 							{
 								session.setAttribute("rowOff", rowOff+20);
+								session.setAttribute("flag", "false");
 								response.sendRedirect("analytics.jsp");
 							}
 
 							if(action != null && action.equals("col"))
 							{
 								session.setAttribute("colOff", colOff+10);
+								session.setAttribute("flag", "false");
 								response.sendRedirect("analytics.jsp");
 							}
 
 							if(action != null && action.equals("filter"))
 							{
-								session.setAttribute("main", main);
-								session.setAttribute("state", state);
-								session.setAttribute("category", category);
-								session.setAttribute("ages", age);
-								session.setAttribute("rowOff", 0);
-								session.setAttribute("colOff", 0);
+								if(session.getAttribute("flag") == null || session.getAttribute("flag").equals("true")) {
+									session.setAttribute("main", main);
+									session.setAttribute("state", state);
+									session.setAttribute("category", category);
+									session.setAttribute("ages", age);
+									session.setAttribute("rowOff", 0);
+									session.setAttribute("colOff", 0);
+								}
+								else
+								{
+									session.setAttribute("flag", "true");
+									response.sendRedirect("analytics.jsp");
+								}
 							}
 							/* FILTERING STRINGS */
 
@@ -149,7 +171,7 @@
 							out.println(stateStr);	
 							// CATEGORY FILTER 
 							if(category != null && !category.equals("ALL"))  
-								categoryStr = " AND products.cid = categories.id AND categories.name = \'" + category + "\'"; 
+								categoryStr = " AND categories.name = \'" + category + "\'"; 
 							// AGE FILTER 
 							if(age != null && !age.equals("ALL")) 
 								ageStr = " AND users.age " + age;
@@ -168,7 +190,12 @@
 							
 							// PRODUCT NAMES (TOP ROW)
 							out.println("before query "+stateStr );
-							rs = statement.executeQuery("SELECT products.name, products.id, sum(sales.quantity*sales.price) as amount FROM Products, Sales, categories where sales.pid = products.id" + categoryStr + " group by products.id order by products.name asc limit 10 offset " + colOff);
+							//startProd = System.currentTimeMillis();
+
+//							test1 = statement.executeQuery("CREATE INDEX sales_uid_index ON sales(uid)");
+
+							rs = statement.executeQuery("SELECT p.name, p.id, sum(sales.quantity*sales.price) as amount FROM (select * from Products group by products.id order by products.name asc) as p inner join Sales on (sales.pid = p.id) inner join categories on (categories.id = p.cid) where 1=1" + categoryStr + " group by p.id, p.name order by p.name asc limit 10 offset " + colOff);
+							endProd = System.currentTimeMillis();
 								while(rs.next()){ 	
 								
 									String pName = rs.getString("name");
@@ -193,16 +220,20 @@
 						if(session.getAttribute("main") != null && session.getAttribute("main").equals("State")) {
 							/*rs = statement.executeQuery("SELECT users.name, users.id, sum(sales.quantity * sales.price) as amount FROM users, sales where sales.uid = users.id group by users.id order by users.name asc limit 20 offset " + rowOff);*/
 							out.println("before query "+ categoryStr );
-							rs = statement.executeQuery("SELECT users.state, SUM(sales.quantity * sales.price) AS amount FROM users, sales, products, categories WHERE sales.uid = users.id" + categoryStr + " AND sales.pid = products.id " + stateStr + ageStr + " GROUP BY users.state ORDER BY users.state ASC LIMIT 20 OFFSET " + rowOff);
-                            	while(rs.next()){ 	
+							//startCust = System.currentTimeMillis();
+							rs = statement.executeQuery("SELECT u.state, SUM(sales.quantity * sales.price) AS amount FROM (select * from users where 1=1" + stateStr + ageStr + ") as u, sales inner join products on (sales.pid = products.id) inner join categories on (products.cid = categories.id) WHERE sales.uid = u.id" + categoryStr + " GROUP BY u.state ORDER BY u.state ASC LIMIT 20 offset "+ rowOff);
+							endCust = System.currentTimeMillis();
+								while(rs.next()){ 	
 								%>
 									<tr>
 										<th><%=rs.getString("state")%> ($<%=rs.getString("amount")%>)</th>
 										<%
-										 /*rs1 = statement.executeQuery("select products.id, sum(sales.quantity) as res from products, sales where sales.uid= "+ rs.getInt("users.id") +" and products.id = sales.pid group by products.id");*/
-										 /*rs1 = statement2.executeQuery("select sum(sales.quantity) as res from products cross join sales where sales.uid ="+ rs.getInt("id")+" and sales.pid = products.id group by sales.pid, products.id order by products.name asc");*/
-										 rs1 = statement2.executeQuery("select result.res from ( (select products.id as id, products.name as name, sum(sales.quantity * products.price) as res from products cross join sales, users, categories where sales.uid = users.id and users.state = \'"+ rs.getString("state")+"\' and sales.pid = products.id" + ageStr + categoryStr + " group by sales.pid, products.id order by products.name asc) UNION (select products.id as id, products.name as name, 0 as res from products where products.id not in (select products.id from products, sales, users where sales.uid = users.id and users.state =\'"+ rs.getString("state")+"\' and products.id = sales.pid" + ageStr + " )) ) as result order by result.name asc limit 10 offset " + colOff);
-										while(rs1.next()){
+										/*rs1 = statement.executeQuery("select products.id, sum(sales.quantity) as res from products, sales where sales.uid= "+ rs.getInt("users.id") +" and products.id = sales.pid group by products.id");*/
+										/*rs1 = statement2.executeQuery("select sum(sales.quantity) as res from products cross join sales where sales.uid ="+ rs.getInt("id")+" and sales.pid = products.id group by sales.pid, products.id order by products.name asc");*/
+								//		startTable = System.currentTimeMillis();
+										rs1 = statement2.executeQuery("select result.res from ( (select p.id as id, p.name as name, sum(sales.quantity * p.price) as res from (select * from products group by products.id order by products.name asc) as p inner join sales on (sales.pid = p.id) inner join users on (sales.uid = users.id) inner join categories  on (p.cid = categories.id) where users.state = \'"+ rs.getString("state")+"\'" + ageStr + categoryStr + " group by p.id, p.name order by p.name asc) UNION (select products.id as id, products.name as name, 0 as res from products where products.id not in (select products.id from products, sales, users where sales.uid = users.id and users.state =\'"+ rs.getString("state")+"\' and products.id = sales.pid" + ageStr + " )) ) as result order by result.name asc limit 10 offset " + colOff);
+										endTable = System.currentTimeMillis();
+										 while(rs1.next()){
 										%>
 											<td><%=rs1.getString("res")%></td>
 										<%}%>
@@ -211,17 +242,20 @@
 						}
 						else{ //(main != null && main.equals("State")) {		// *** STATE *** NAMES (LEFT COLUMN)
 							/*rs = statement.executeQuery("SELECT users.state, SUM(sales.quantity * sales.price) AS amount FROM users, sales, products WHERE sales.uid = users.id AND sales.pid = products.id GROUP BY users.state ORDER BY users.state ASC LIMIT 20 OFFSET " + rowOff);*/
-							out.println("before query "+ categoryStr );
-							rs = statement.executeQuery("SELECT u.name, u.id, sum(sales.quantity * sales.price) as amount FROM (select * from users where 1=1" + stateStr + ageStr + " group by users.id order by users.name limit 20 offset " + rowOff + ") as u inner join sales on (u.id = sales.uid) inner join products on (sales.pid = products.id), categories where 1=1" + categoryStr + " group by u.id, u.name order by u.name limit 20");
+							out.println("before query "+ stateStr + categoryStr + ageStr + rowOff );
+							//startCust = System.currentTimeMillis();
+							rs = statement.executeQuery("SELECT u.name, u.id, sum(sales.quantity * sales.price) as amount FROM (select * from users where 1=1" + stateStr + ageStr + " group by users.id order by users.name) as u, sales inner join products on (sales.pid = products.id) inner join categories on (products.cid = categories.id) where sales.uid = u.id" + categoryStr + " group by u.id, u.name order by u.name limit 20 offset " + rowOff);
 							/*rs = statement.executeQuery("SELECT users.name, users.id, sum(sales.quantity * sales.price) as amount FROM users, sales, categories, products where sales.uid = users.id " + stateStr + categoryStr + ageStr + " group by users.id order by users.name asc limit 20 offset " + rowOff);*/
-
+							endCust = System.currentTimeMillis();
                         	while(rs.next()){ 	
 							%>
 								<tr>
 									<th><%=rs.getString("name")%> ($<%=rs.getString("amount")%>)</th>
 									<% // *********needs changing here :(
+							//			startTable = System.currentTimeMillis();
 										rs1 = statement2.executeQuery("select result.res from ( (select products.id as id, products.name as name, sum(sales.quantity * products.price) as res from products cross join sales where sales.uid ="+ rs.getInt("id")+" and sales.pid = products.id group by sales.pid, products.id order by products.name asc) UNION (select products.id as id, products.name as name, 0 as res from products where products.id not in (select products.id from products, sales where sales.uid = "+ rs.getInt("id")+" and products.id = sales.pid)) ) as result order by result.name asc limit 10 offset " + colOff);
-									while(rs1.next()){
+										endTable = System.currentTimeMillis();
+										while(rs1.next()){
 									%>
 										<td><%=rs1.getString("res")%></td>
 									<%}%>
@@ -239,6 +273,7 @@
                 					</form> 
 								</th>
 					</table>
+					<%end = System.currentTimeMillis();%>
 					<tr>
 						<td>
 						<h2>what is this</h2>
@@ -246,6 +281,22 @@
 						<td>format2
 						</td>
 					</tr>
+					 <tr> 
+					 	<td>Products Header</td> 
+					 	<td><%=(endProd-start)%></td> 
+					 </tr> 
+					 <tr> 
+					 	<td>Customer/State Header</td> 
+					 	<td><%=(endCust-endProd)%></td> 
+					 </tr> 
+					 <tr> 
+					 	<td>Populating Charts</td> 
+					 	<td><%=(endTable-endCust)%></td> 
+					 </tr> 
+					 <tr> 
+					 	<td>Total Time</td> 
+					 	<td><%=(endTable-start)%></td> 
+					 </tr>
 				</td>
 			</tr>
 
