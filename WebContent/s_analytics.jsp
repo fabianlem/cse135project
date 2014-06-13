@@ -285,7 +285,26 @@
 							//rs = statement.executeQuery("SELECT u.name, u.id, sum(sales.quantity * sales.price) as amount FROM (select * from users where 1=1" + stateStr + ageStr + " group by users.id order by users.name) as u, sales inner join products on (sales.pid = products.id) inner join categories on (products.cid = categories.id) where sales.uid = u.id" + categoryStr + " group by u.id, u.name order by u.name limit 20 offset " + rowOff);
 							/*rs = statement.executeQuery("SELECT users.name, users.id, sum(sales.quantity * sales.price) as amount FROM users, sales, categories, products where sales.uid = users.id " + stateStr + categoryStr + ageStr + " group by users.id order by users.name asc limit 20 offset " + rowOff);*/
 
-							rs = statement.executeQuery("select uName, SUM(total) AS total from CustomerSales where 1=1" + categoryStr + stateStr + " group by uName order by total desc limit 20");
+							//rs = statement.executeQuery("select uName, SUM(total) AS total from CustomerSales where 1=1" + categoryStr + stateStr + " group by uName order by total desc limit 20");
+
+							if(stateStr.equals("") && categoryStr.equals("")){
+							//out.print("first");
+								rs = statement.executeQuery("select uName, total from RightColumnCust1 group by uName, total order by total desc limit 20");
+							}
+							else if(!stateStr.equals("") && categoryStr.equals("") ){
+							//out.print("second");
+								rs = statement.executeQuery("select uName, total from RightColumnCust2 where 1=1" +stateStr + " order by total desc limit 20");
+							}
+							else if(!categoryStr.equals("") && stateStr.equals("") ){
+							//out.print("third");
+								rs = statement.executeQuery("select uName, total from RightColumnCust3 where 1=1" + categoryStr + " order by total desc limit 20");
+							}
+							else{
+//out.print("4th");
+								rs = statement.executeQuery("select uName, SUM(total) AS total from StateFilterSales where 1=1 " + categoryStr + stateStr + " group by uName order by total desc limit 20");
+
+}
+
 							endCust = System.currentTimeMillis();
 							
                         	while(rs.next()){
