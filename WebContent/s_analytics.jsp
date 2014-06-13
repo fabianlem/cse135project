@@ -10,7 +10,7 @@
 	else{
 	
 		%>
-	<h1>Welcome </h1>
+	<h1>Welcome <%=session.getAttribute("name").toString()%></h1>
 	<h2>Sales Analytics</h2>
 		<table>
 		<%
@@ -297,7 +297,7 @@
 							}
 							else if(!categoryStr.equals("") && stateStr.equals("") ){
 							//out.print("third");
-								rs = statement.executeQuery("select uName, total from RightColumnCust3 where 1=1" + categoryStr + " order by total desc limit 20");
+								rs = statement.executeQuery("select uName, SUM(total) AS total from CustomerSales where 1=1" + categoryStr + " group by uName, cName order by total desc limit 20");
 							}
 							else{
 //out.print("4th");
